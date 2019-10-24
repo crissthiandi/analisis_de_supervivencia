@@ -1,0 +1,413 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{graphicx,subfig,wrapfig,tabularx,multicol,verbatim,booktabs}
+\usepackage{rotating} % Para girar tablas
+\usepackage[left=1.9cm, right=1.9cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{setspace}
+\usepackage{cprotect}
+\usepackage{enumerate}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{multirow,tabularx}
+\spanishdecimal{.}
+\usepackage{fancyhdr}
+\usepackage{color, xcolor}
+\usepackage{multicol, blindtext}
+\usepackage[hidelinks]{hyperref} %para poner hipervínculos
+%\usepackage{calrsfs}  %% Letras caligráficas, sólo ponemos en entorno matemático $\mathcal{Letra}$
+\usepackage{actuarialsymbol} %% Simbología Actuarial
+\usepackage{actuarialangle}  
+
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\cfoot{\thepage}
+\rfoot{Análisis de Superviviencia, Actuaría.}
+\lfoot{VJC}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\headrulewidth}{0pt}
+%% \xrightarrow{texto}: es para poner texto sobre flechas, por ejemplo para notación de convergencias. %%
+
+
+
+\begin{document}
+	
+	\begin{figure}[h]
+		\raggedright
+		\includegraphics[scale=.22]{q}\hfill
+		\includegraphics[scale=.15]{w}
+	\end{figure}
+	
+	\begin{center}
+		{\LARGE \textbf{\sc Análisis de supervivencia aplicado al pago de un crédito no revolvente.}}\\
+		\vspace{2mm}
+		{\large Verónica Bañuelos Martínez$ ^1 $, Julio A. de la Cruz Canul Medina$ ^1 $, Christian A. Díaz Chablé$ ^1 $.}\\
+		\vspace{7.5mm}
+		$^1$\textit{Universidad Autónoma de Yucatán. Facultad de Matemáticas.}
+	\end{center}
+	
+	\begin{center}
+		\textcolor{blue}{\rule{150mm}{0.5mm}}
+	\end{center}
+	
+	\begin{abstract}
+		En el siguiente reporte se busca analizar el comportamiento del tiempo de pago de un préstamo no revolvente correspondiente a una institución financiera y determinar si las variables género y/o nivel académico influyen en dicho tiempo. Para ello se utilizó herramientas del análisis de supervivencia. Se llegó a la conclusión de no existe evidencia de que dichas variables ejercen una influencia significativa en el tiempo.\\
+		\vspace{2mm}
+		\underline{\textbf{Palabras clave:}} \hspace{1mm} \textit{datos financieros, análisis de supervivencia, tiempo de pago, riesgo de crédito}
+	\end{abstract}
+	
+	\begin{center}
+		\textcolor{blue}{\rule{150mm}{0.5mm}}
+	\end{center}
+	
+	\vspace{5mm}
+\begin{multicols}{2}
+	\onehalfspacing
+    
+    \section{Introducción}
+	    A ningún banco o institución financiera le gustaría prestar dinero a un cliente que caiga en la incapacidad de devolver el préstamo. Lamentablemente para las instituciones financieras, este es un riesgo latente en cada cliente e imposible de eliminar por completo. Según el Banco de México <<\textit{El riesgo de contraparte existe cuando se da la posibilidad de que una de las partes de un contrato financiero sea incapaz de cumplir con las obligaciones financieras contraídas, haciendo que la otra parte del contrato incurra en una pérdida. El riesgo de crédito es el caso particular cuando el contrato es uno de crédito, y el deudor no puede pagar su deuda.}>>
+	    
+	    Las consecuencias de una mala gestión de riesgo de crédito pueden ser catastróficas para cualquier entidad financiera. Un claro ejemplo fue el problema de las hipotecas subprime en Estados Unidos que en el año 2008 ocasionó una crisis financiera que llegó a tener consecuencias globales.
+	    
+	    A continuación se estudiará una base de datos sobre las características de los préstamos que realiza una institución financiera. Esto con el fin de obtener información acerca del comportamiento de pago de sus los clientes. El conjunto de datos incluye a los clientes con préstamo pagado, préstamo vencido y puestos en recaudación sin haber pagado al momento del estudio, y los que han pagado después de que fueron puestos en recaudación. El producto financiero es un préstamo, el cuál debe ser pagado en su totalidad antes o al término del plazo acordado, en una sóla exhibición.
+	    
+	    Como parte de un preprocesamiento de datos, se realizó una limpieza debido a errores presentes en los registros así como incoherencia entre las variables:
+	    
+	    Lo primero que se realizó fue renombrar las variables por estética. Lo siguiente fue darle formato de fecha a las variables \verb|Effective_date|, \verb|Due_date| y \verb|Paid_off_time|. El formato utilizado es aa/mm/dd. Luego, en la variable \verb|Education|, estaba mal escrito el grado de licenciatura (\verb|Bechalor| en vez de \verb|Bachelor|). De igual forma, se detectó que los plazos del préstamo (\verb|Terms|) no coincidía con las fechas de otorgamiento y vencimiento del préstamo, por lo que, considerando que \verb|Terms| no tiene errores, se volvió a calcular la columna de \verb|Due_date|. Así mismo, las variables \verb|Loan_status| y \verb|Past_due_days| fueron corregidas ya que en la primera habían registros que realizaron su pago después de una recaudación pero estaban marcados como si su pago fuese realizado sin entrar en recaudación; en la segunda, habían un varios registros que no coincidían con el número de días después del vencimiento. 
+	    En la base de datos se tiene las siguientes variables:
+	    
+	    \begin{itemize}
+	    	\item \verb|Loan_ID|: Código de identificación único para cada cliente.
+	    	\item \verb|Loan_status|: El préstamo está pagado (\verb|Paidoff|), en recaudación (\verb|Collection|) o pagado después de la recaudación (\verb|Collection_Paidoff|).
+	    	\item \verb|Principal|: Monto básico del préstamo original.
+	    	\item \verb|Terms|: Condiciones de pago semanal (7 días), quincenal (15 días) o mensual (30 días). 
+	    	\item \verb|Effective_date|: Fecha en que fue otorgado el préstamo.
+	    	\item \verb|Due_date|: Fecha de vencimiento del préstamo.
+	    	\item \verb|Paid_off_time|: Fecha en que fue pagado el préstamo.
+	    	\item \verb|Past_due_days|: Número de días después del vencimiento hasta que se pagó el préstamo o fin del estudio.
+	    	\item \verb|Age|: Edad del cliente.
+	    	\item \verb|Education|: Nivel académico del cliente. Puede ser \verb|Master or above|, \verb|Bachelor|, \verb|College| o \verb|High School or below|.
+	    	\item \verb|Gender|: Género del cliente, \verb|female| o \verb|male|.
+	    \end{itemize}
+	    
+	    En cada una de ellas se registran los datos de un total de 500 contratos de un préstamo no revolvente que se paga en una sola exhibición.
+	    
+	    La institución financiera tiene el interés de saber cuál es el comportamiento de los pagos que realizan los clientes para cerrar su crédito, es decir, el tiempo que le toma pagarlos, así como si existe influencia alguna en el comportamiento del pago ya sea por el género de la persona o su nivel académico. Para ello, se estableció como fecha inicial del estudio la mínima fecha en que fue otorgado el préstamo, \textbf{2016-09-08}; la fecha final del estudio se estableció el \textbf{2016-12-08}.
+	    
+	    El evento de interés es que el cliente ha pagado su préstamo (sin considerar si ha caído en atraso o no), por lo que se define al tiempo de vida como el número de días que transcurrieron desde que se libera el crédito hasta que el cliente lo paga. Es importante mencionar que en el presente estudio se está considerando que los días para pagar el crédito comienzan desde el día en que se otorga, de manera que si un cliente paga el mismo día en que se le otorgó el crédito, se considerará que el número de días transcurridos hasta que pagó es uno.
+	    
+	    El uso de un análisis de supervivencia es crucial ya que nos interesa el tiempo que transcurre hasta que un cliente paga su crédito, es decir, tiempo hasta que se manifiesta un evento de interés. Cabe mencionar que el estudio se hace 
+	    por una ventana de tiempo de 91 días y hay montos 
+	    que no son pagados antes del 2016-12-08. Estos datos tendrán censura por 
+	    la derecha. Es en las herramientas del análisis de supervivencia donde 
+	    se encuentra la forma de estimar la curva de supervivencia de la variable 
+	    tiempo de vida, a pesar de tener datos censurados.
+	    
+	    \section{Análisis preliminar}
+	    A continuación, observemos cual es la estructura de la muestra a partir de las variables que se tienen.
+	    
+	\end{multicols}	    		
+	
+	\begin{table}[htbp]
+	\centering
+	\caption{Resumen de la base de datos}
+	\resizebox{\linewidth}{!}{\begin{tabular}{rlrlrr}\toprule[0.05cm]
+			\multicolumn{3}{c}{\textbf{Tipo de préstamos}} & \multicolumn{3}{c}{\textbf{Información de los prestamístas}} \\
+			\midrule
+			\multicolumn{1}{l}{\textit{Loan status}} & \textit{Principal} & \multicolumn{1}{l}{\textit{Terms}} & \textit{Age} & \multicolumn{1}{l}{\textit{Education}} & \multicolumn{1}{l}{\textit{Gender}} \\
+			\midrule
+			\midrule
+			\multicolumn{1}{l}{COLLECTION        :100} & Min.   : 300.0 & \multicolumn{1}{l}{7:21} & Min.   :18.00 & \multicolumn{1}{l}{Bachelor            : 67} & \multicolumn{1}{l}{female: 77} \\
+			\multicolumn{1}{l}{COLLECTION PAIDOFF:120} & 1st Qu.:1000.0 & \multicolumn{1}{l}{15:207} & 1st Qu.:27.00 & \multicolumn{1}{l}{College             :220} & \multicolumn{1}{l}{male  :423} \\
+			\multicolumn{1}{l}{PAIDOFF           :280} & Median :1000.0 & \multicolumn{1}{l}{30:272} & Median :30.00 & \multicolumn{1}{l}{High School or Below:209} &  \\
+			& Mean   : 943.2 &       & Mean   :31.12 & \multicolumn{1}{l}{Master or Above     :  4} &  \\
+			& 3rd Qu.:1000.0 &       & 3rd Qu.:35.00 &       &  \\
+			& Max.   :1000.0 &       & Max.   :51.00 &       &  \\
+			\bottomrule[0.05cm]
+	\end{tabular}}%
+	\label{tab:summary}%
+	\end{table}
+	
+	\begin{multicols}{2}
+	\onehalfspacing    	
+	De la Tabla \ref{tab:summary} podemos observar la distribución de los clientes correspondiente para cada variable. Se cuenta con 280 clientes que han pagado su 
+	préstamo y 120 que lo pagaron luego de la recaudación. Solamente hay 100 clientes de los cuales no se observó en el periodo de tiempo su pagó, por lo que son los 
+	datos que muestran censura por la derecha. Cabe a destacar que la suma de las dos 
+	proporcione mencionadas por último, es decir, el total de clientes que pagaron fuera del plazo acordado, es casi iguales al total 
+	de personas que pagaron a tiempo, lo cual nos indica una tasa alta de 
+	incumplimiento de pago en el tiempo estipulado. También se puede observar que 
+	el  75.4\% de los préstamos son de \$1000. Siendo en promedio 943.2\$ el monto del préstamo. De igual forma, se observa que el la mayor 
+	parte de los préstamos tienen plazos quincenales y mensuales. Por otro lado, podemos notar que la mayoría de los clientes son universitarios y de preparatoria 
+	o menor grado. Por último, se tiene que solamente una quinta parte de la muestra esta conformada por
+	mujeres.	
+	%% Aquí acabó en la pagina 2 exacto, lo demás ya no usaré multicols 
+	%%porque necesito tener el comando \twocolumns para poder ingresar 
+	%%tablas 
+	%%y graficos en sus entornos sin necesidad de romper el multicols xd 
+	%jejejej okis.cris
+	\end{multicols}
+	\twocolumn \onehalfspacing
+	% Aquí continua más chevere xd
+	\subsection{Enfoque gráfico}
+	\subsubsection{Por género}
+	
+	A continuación se muestra una descripción de la base de datos de acuerdo a las variables género y nivel académico.
+	
+	%%% GRAFICAS PARA EXPPLICAR ALV
+	\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\linewidth]{EducationByGenderGraph}
+	\caption{Gráfico de barras que muestra el recuento de clientes por nivel académico y además muestra la proporción mujeres-hombres.}
+	\label{fig:educationbygendergraph}
+	\end{figure}
+
+	En la Figura \ref{fig:educationbygendergraph} podemos ver como está distribuida la proporción de hombres y mujeres según nivel educativo, en el vemos que en esta base de datos, se tiene que en todos los niveles educativos hay más hombres que mujeres. En el nivel educativo ``Master or above''  no hay registro de clientas.
+	
+	\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\linewidth]{StatusByGender}
+	\caption{Gráfica de barras que muestra el recuento de clientes de acuerdo al estatus de su préstamo y la proporción de mujeres y hombres.}
+	\label{fig:statusbygender}
+	\end{figure}
+	
+	En la figura \ref{fig:statusbygender} se tiene que aunque pequeño, el número de mujeres que no pagaron su préstamo durante el estudio existe y no es cero. La distribución hombres-mujeres según el estado del préstamo a simple vista parece ser uniforme. Esto quiere decir que, por ejemplo, no parece haber algún estatus en el que hayan significativamente más mujeres que hombres a comparación de las otras variables. Por otro lado, la proporción de hombres que no han pagado es similar a la de hombres que pagaron fuera del plazo.
+	
+	\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\linewidth]{TermsByGender}
+	\caption{Gráfico de barras que muestra el recuento de clientes de acuerdo al plazo del préstamo así como la proporción de mujeres y hombres.}
+	\label{fig:termsbygender}
+	\end{figure}
+	
+	En el gráfico de la figura \ref{fig:termsbygender} se puede apreciar como se dividen las proporciones de hombres y mujeres según el plazo que tuvieron para pagar su deuda. Podemos ver que la mayoría de las personas tuvieron entre 15 y 30 días para pagar, la cantidad de personas que tuvieron un plazo de 7 días es por mucho menor a la de los otros dos plazos posibles. La mayoría tuvo el plazo de 30 días para pagar, de estos la mayoría fue hombres. De igual manera que en en la figura \ref{fig:statusbygender}, parece haber una distribución uniforme de la proporción hombres-mujeres, por lo que de manera intuitiva parece ser que la variable género no influye en el tiempo de pago.
+	
+	\subsubsection{Por nivel académico}
+	
+	\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\linewidth]{StatusByEducation}
+	\caption{Gráfico de barras que muestra el recuento de clientes de acuerdo al estatus de su préstamo así como la proporción del grado académico.}
+	\label{fig:statusbyeducation}
+	\end{figure}
+	
+	Como podemos notar en la figura \ref{fig:statusbyeducation} parece ser que hay distribución del tiempo similar entre los niveles educativos para los distintos estatus, salvo en el nivel educativo llamado ``Master or above'', el cual tiene tendencia a realizar su pago a tiempo, y en el nivel educativo ``High School or Above'' que representa una mayor proporción de personas que no han pagado su préstamo a comparación del de pagos fuera del plazo de recaudación. Por lo que podría haber una influencia del nivel educativo en el tiempo de pago. Esta sospecha será puesta a prueba en secciones posteriores con pruebas estadísticas.
+	
+	\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\linewidth]{TermsByEducation}
+	\caption{Gráfico de barras que muestra el recuento de clientes de acuerdo al plazo así como la proporción del nivel académico.}
+	\label{fig:termsbyeducation}
+	\end{figure}
+	
+	Como fue mencionado con anterioridad, la mayoría de las personas tuvieron plazos de pago mayores a 7 días. De la figura \ref{fig:termsbyeducation} podemos notar que ninguna persona con el nivel de ``Master or above'' tuvo un plazo de pago mayor a 15 días, por otro lado, podemos ver que hay una distribución muy parecida entre los demás niveles de educación y los plazos para pagos, incluso parece ser que la distribución según nivel académico en los plazos de 15 y 30 días es proporcional.  
+	
+	\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\linewidth]{AgeGenderTime}
+	\caption{Gráfico de dispersión de la variable tiempo en días con edad. Los puntos rojos corresponde a hombres mientras que los puntos azules representan a las mujeres.}
+	\label{fig:agegendertime}
+	\end{figure}
+	
+	A continuación veremos un tipo de gráfico diferente. En él podemos observar como se distribuye el tiempo de pago, siendo día la unidad de medida, respecto a las edades de las personas. Se puede notar que hay una acumulación en los primeros días, sobretodo antes de los 15 y 30 días que es cuando vencen los préstamos. Lo cual refleja como la mayoría de las personas realizan su pago a tiempo, un porcentaje cercano a 59.8\%, habiendo una mayor acumulación de personas entre las edades de 25 a 40 años. Sin embargo, podemos notar que en general se parecen formar tres lineas horizontales, lo cual indica que no hay una influencia de la edad en el tiempo de pago, puesto que no parecer haber alguna concentración importante.
+	
+	Por último, en dicho gráfico notamos que de las personas que no pagan, muy pocas son mujeres y se concentran entre las 
+	edades de 25 y 35.
+	
+	\begin{figure}[htb]
+		\centering
+		\includegraphics[width=\linewidth]{AgeEducationTime}
+		\caption{Gráfico de dispersión de la variable tiempo en días con la edad. Los puntos rojos son los Bachelors, los puntos azules son los College, los puntos verdes son los de High School or below y los puntos amarillos corresponde a Master or above.}
+		\label{fig:ageeducationtime}
+	\end{figure}
+	
+	En la figura \ref{fig:ageeducationtime} podemos ver un gráfico similar al anterior, pero con clasificación por educación. Se puede notar que las personas que tardan entre 38 y 88 días son las que tienen menor población e incluso son de todos los niveles de educación excepto ``Master or above''. Al igual que en gráfico anterior se puede observar que sus edades son variables al formarse tres lineas paralelas y no parece haber acumulación alguna de un nivel de educación. Podría ser que hay una acumulación del nivel educativo ``Master or above'' antes de los 15 días y que el único dato que pertenece a este nivel y tiene más de 75 días es un valor extremo, pero en general tenemos muy pocos datos de dicho nivel como para saber con más certeza sobre su distribución.
+	
+	\subsection{Curvas de supervivencia}
+		\subsubsection{Curvas por género}
+		\begin{figure}[htb]
+			\centering
+			\includegraphics[width=\linewidth]{survivalGenderPlot}
+			\caption{Estimación de las curvas de superviviencia de la variable tiempo en días por género.}
+			\label{fig:survivalgenderplot}
+		\end{figure}
+		
+		La figura \ref{fig:survivalgenderplot} parece sugerir que los hombres presentan una mayor probabilidad para pagar su préstamo en un plazo mayor de días que las mujeres, sin embargo, podemos notar que las curvas se cortan en al menos tres momentos y son bastante cercanas. Por lo que podría ser que hay una semejanza entre la curva de supervivencia de los hombres y la de mujeres y por lo tanto, no existe diferencia entre el tiempo que le toma pagar a un hombre y a una mujer y no debería haber un tratamiento como grupos distintos.
+		
+		\subsubsection{Curvas por nivel académico}
+		\begin{figure}[htb]
+			\centering
+			\includegraphics[width=\linewidth]{survivalEducationPlot}
+			\caption{Estimación de las curvas de supervivencia de la variable tiempo en días por nivel académico.}
+			\label{fig:survivaleducationplot}
+		\end{figure}
+		
+		Mientras que analizando la figura \ref{fig:survivaleducationplot} se puede 
+		observar que sí parece haber diferencias entre las curvas de supervivencia de las personas por su nivel académico en los primeros días de pago. En específico parece que las personas con nivel académico ``Master or above'' tienen menores probabilidades de realizar sus pagos en un tiempo corto que las demás personas, en contraste, parece que las personas con nivel académico menor a ``Master or above'' tienen comportamiento en sus curvas de supervivencia bastante similar, en otras palabras, se sugiere que tienen la misma probabilidad de pagar en un tiempo dado. 
+		
+		Cabe a destacar que el número de observaciones de personas con nivel académico ``Master or above'' es 4, muy por debajo del número de observaciones que tenemos de los otros niveles educativos. Sería ideal contar con un número mayor de registros de dicho nivel para asi tener una mejor estimación de la curva de supervivencia. Por lo que si llegase a ser significativamente diferente de las demás curvas, hay que considerar lo anterior y quizás habría que considerar utilizar más herramientas estadísticas o el análisis con una muestra diferente.
+	
+    \section{Metodología}
+    	\subsection{Comparaciones}\label{hipotesis}
+    	Del análisis preliminar se sugiere que no hay alguna diferencia en las curvas de supervivencia por el género del cliente así como su nivel académico. Para corroborar lo anterior, se realizarán pruebas de hipótesis para ambos casos.
+    	
+    	A continuación se plantean las hipótesis a juzgar.
+    	
+    	\subsection{Clasificación por género}
+    	Como se ha mencionado anteriormente, se quiere comprobar si puede existir algún efecto por el género del cliente del tiempo, en días, que tarda en pagar su crédito, por lo que las hipótesis son:\\
+    		
+    	\noindent$H_0$: La curva de supervivencia para los clientes hombres es igual a la de las mujeres para todo tiempo $t\geq 0$\\
+    	vs\\
+    	$H_1$: La curva de supervivencia para los clientes hombres difiere a la de las mujeres para alguna $t\geq 0$\\ 
+    	
+    	En notación matemática se escribe como\\
+    	$H_0: S(t)_H = S(t)_M,\quad \forall\, t, t\geq 0$\\
+    	vs \\
+    	$H_1: S(t_0)_H \neq S(t_0)_M,\quad \text{ para algún } t_0\geq0$
+    	
+    	\subsection{Clasificación por nivel académico}
+    	Realizando la prueba de hipótesis para la clasificación por el nivel académico, se obtiene que las hipótesis a plantar son:\\
+    	
+    	\noindent$H_0$:Las curvas de supervivencia de las personas agrupadas por su nivel de educación, son iguales para todo tiempo $t\geq 0$\\
+    	vs \\
+    	$H_1$:Las curvas de supervivencia de las personas agrupadas por su nivel de educación no son iguales para algún tiempo $t\geq 0$.\\
+ 
+    	En notación matemática se escribe como\\
+    	$H_0: S(t)_i = S(t)_j,\quad \forall\, i,j,t \text{ con } i\neq j, t\geq 0$ \\
+    	vs \\
+    	$H_1: S(t_0)_i \neq S(t_0)_j,$ \\
+    	$\text{para algún par }i,j, \text { y tiempo } t_0\geq 0 \text{ con } i\neq j$ donde, $ i,j $ toman valores en $ \{1,2,3,4 \} $ donde 
+    	\begin{itemize}
+    		\item  $S(t)_1$ es la curva de supervivencia de las personas con el grado de licenciatura (Bachelor). 
+    		\item  $S(t)_2$ es la curva de supervivencia de las personas con el grado de college.
+    		\item   $S(t)_3$ es la curva de supervivencia de las personas con el grado de preparatoria o menor.
+    		\item  $S(t)_1$ es la curva de supervivencia de las personas con el grado de maestría o superior. 
+    	\end{itemize}
+    	
+    	Si se rechazará la hipótesis nula en este caso, se realizarían comparaciones múltiples por la prueba de Peto \& Peto con el p-valor ajustado por el método de Bonferroni para determinar cuáles son los niveles de la variable \verb|Education| que podrían combinarse para crear subpoblaciones.
+    	
+    	Después de haber determinado si hay o no subpoblaciones así como indentificarlas, lo siguiente es ajustar un modelo paramétrico adecuado para la variable de interés.
+    	
+    	Se utilizó el software \verb|R| así como las librerías \verb|survival|, \verb|KMSurv|, \verb|survminer|, \verb|survMisc| y \verb|flexsurv| para todo lo relacionado con el análisis de supervivencia.
+    	
+    	Se consideró un nivel de significancia del 5\%.
+    	
+    \section{Resultados}
+    	De la prueba de hipótesis planteada para la clasificación por género (Tabla \ref{tab:pruebaGender}), con un valor p$=$0.14 y nivel de confianza del 95\% no se rechaza la hipótesis nula, es decir, no hay evidencia suficiente para decir que la curva de supervivencia para hombres es estadísticamente diferente a la de las mujeres.
+    		
+    	
+    	\begin{table}[htbp]
+    		\centering
+    		\caption{Resultados de la prueda de hipótesis sobre diferencias en las curvas de supervivencia por género obtenida en R.}
+    		\resizebox{\columnwidth}{!}{\begin{tabular}{llllll}
+    			\multicolumn{6}{l}{\textbf{Prueba de hipótesis para diferencias entre género}} \\
+    			\midrule
+    			& \textit{N} & \textit{Observed} & \textit{Expected} & \textit{$(O-E)^2/E$} & \textit{$(O-E)^2/V$} \\
+    			\midrule
+    			female & \multicolumn{1}{r}{77} & \multicolumn{1}{r}{42.6} & \multicolumn{1}{r}{35.9} & \multicolumn{1}{r}{1.246} & \multicolumn{1}{r}{2.18} \\
+    			male  & \multicolumn{1}{r}{423} & \multicolumn{1}{r}{207.4} & \multicolumn{1}{r}{214.1} & \multicolumn{1}{r}{0.209} & \multicolumn{1}{r}{2.18} \\
+    			\midrule
+    			\multicolumn{6}{l}{ Chisq= 2.2  on 1 degrees of freedom, p= 0.14 } \\
+    		\end{tabular}}%
+    		\label{tab:pruebaGender}%
+    	\end{table}%
+    	
+    	Ahora bien, de la prueba de hipótesis planteada para la clasificación de nivel académico (Tabla \ref{tab:pruebaEdu}), con un nivel de confianza del 95\% y un valor p$=$0.0542 no se rechaza la hipótesis nula, es decir, no hay evidencia suficiente para decir al menos una curva de supervivencia para nivel académico es estadísticamente con respecto a otra.
+    	
+    	De los resultados anteriores se concluye que no hay influencia en los días que tarda un cliente en pagar su préstamo tanto por género como nivel académico, de manera que no habría que hacer alguna subpoblación al respecto.
+    	
+    	\begin{table}[htbp]
+    		\centering
+    		\caption{Resultados de la prueba de hipótesis para diferencias en las curvas de supervivencia para nivel académico obtenida en R.}
+    		\resizebox{\columnwidth}{!}{\begin{tabular}{llllll}
+    			\multicolumn{6}{l}{\textbf{Prueba de hipótesis para diferencias entre nivel académico}} \\
+    			\midrule
+    			& \textit{N} & \textit{Observed} & \textit{Expected} & \textit{$(O-E)^2/E$} & \textit{$(O-E)^2/V$} \\
+    			\midrule
+    			Bachelor & \multicolumn{1}{r}{67} & \multicolumn{1}{r}{36.33} & \multicolumn{1}{r}{31.236} & \multicolumn{1}{r}{0.8294} & \multicolumn{1}{r}{1.4061} \\
+    			College & \multicolumn{1}{r}{220} & \multicolumn{1}{r}{110.86} & \multicolumn{1}{r}{109.786} & \multicolumn{1}{r}{0.0104} & \multicolumn{1}{r}{0.0281} \\
+    			High School or Below & \multicolumn{1}{r}{209} & \multicolumn{1}{r}{100.03} & \multicolumn{1}{r}{108.054} & \multicolumn{1}{r}{0.5964} & \multicolumn{1}{r}{1.5951} \\
+    			Master or Above & \multicolumn{1}{r}{4} & \multicolumn{1}{r}{2.85} & \multicolumn{1}{r}{0.986} & \multicolumn{1}{r}{3.539} & \multicolumn{1}{r}{5.4994} \\
+    			\midrule
+    			\multicolumn{6}{l}{ Chisq= 7.6  on 3 degrees of freedom, p= 0.0542 } \\
+    		\end{tabular}}%
+    		\label{tab:pruebaEdu}%
+    	\end{table}%
+    	
+    	\subsection{Ajuste paramétrico}
+    	Como no hubieron subpoblaciones, se ajustó el modelo paramétrico a la 
+    	muestra original. En el software \verb|R| se consideraron los modelos Exponencial, Weibull, Gamma, Lognormal, Loglogístico y Gompertz para determinar cuál es el que mejor se ajusta a la muestra. En \verb|R| se compararon los índices AIC de cada modelo para poder determinar cuál es el mejor escogiendo el de menor índice (Tabla \ref{tab:AIC}). Se puede observar que el modelo Loglogístico tiene el menor índice AIC mientras que el modelo Lognormal queda como el de segundo mejor ajuste. A continuación se muestran los ajustes a las curvas de supervivencias de esos modelos así como con sus papales de probabilidad.
+    	
+    	Para ello veamos la figura \ref{fig:papelesplot}, en la cual se grafican %esta palabra no lleva acento potque es el verbo
+    	las curvas de supervivencia teóricas y las curva de supervivencia estimadas vía Kaplan-Meier. Se puede ver que se eligieron estas dos curvas a ajustar ya que tienden a parecerse entre sí.
+    	
+    	\begin{figure}[htb]
+    		\centering
+    		\includegraphics[width=\linewidth]{papelesPlot}
+    		\caption{Modelos paramétricos (los dos mejores) con sus respectivos 
+    		papeles de probabilidad.}
+    		\label{fig:papelesplot}
+    	\end{figure}
+    
+    	Por otro lado, notamos que la curva de papel de probabilidad del modelo Loglogístico oscila respecto a una recta, mientras que el papel de probabilidad del modelo Lognormal no, la cual parece más bien tener una tendencia de curva no lineal.
+    	
+    	\begin{table}[htbp]
+    		\centering
+    		\caption{Criterio de Información de Akaike}
+    		\resizebox{\columnwidth}{!}{\begin{tabular}{lrrrrrr}
+    				\toprule
+    				& \multicolumn{1}{l}{\textbf{LogLogistic}} & 
+    				\multicolumn{1}{l}{\textbf{LogNormal}} & 
+    				\multicolumn{1}{l}{\textbf{Exponential}} & 
+    				\multicolumn{1}{l}{\textbf{Gamma}} & 
+    				\multicolumn{1}{l}{\textbf{Weibull}} & 
+    				\multicolumn{1}{l}{\textbf{Gompertz}} \\
+    				\midrule
+    				AIC   & 3781.618 & 3795.497 & 3878.407 & 3866.922 & 
+    				3877.087 & 3862.618 \\
+    				\bottomrule
+    		\end{tabular}}%
+    		\label{tab:AIC}%
+    	\end{table}
+    	
+    	Con base en lo anterior, el modelo paramétrico que se seleccionó fue el Loglogístico\footnote{La paquetería flexsurv utiliza la función de supervivencia del modelo loglogístico dado por $ S(t) = 1/[1+(t/b)^a]$} con parámetros $a=1.6953$ (shape) y $b=28.8519$ (scale). De la Tabla \ref{tab:modelo} se puede obtener estimaciones por intervalo de confianza al 95\% de los parámetros así como sus desviaciones estándar.
+    	
+    	\begin{table}[htbp]
+    		\centering
+    		\caption{Estimación de los parámetros para el modelo Loglogístico.}
+    		\resizebox{\columnwidth}{!}{\begin{tabular}{lllll}
+    				\multicolumn{5}{l}{\textbf{Estimación del modelo 
+    				paramétrico Loglogístico}} \\
+    				\midrule
+    				& \textit{est} & \textit{L95\%} & \textit{U95\%}   
+    				& \multicolumn{1}{r}{\textit{se}} \\
+    				\midrule
+    				shape & \multicolumn{1}{r}{1.6953} & 
+    				\multicolumn{1}{r}{1.5605} & \multicolumn{1}{r}{1.8418} & 
+    				\multicolumn{1}{r}{0.0717} \\
+    				scale & \multicolumn{1}{r}{28.8519} & 
+    				\multicolumn{1}{r}{26.3836} & \multicolumn{1}{r}{31.5512} & 
+    				\multicolumn{1}{r}{1.3165} \\
+    				\midrule
+    				\multicolumn{5}{l}{N = 500,  Events: 400,  Censored: 100} \\
+    				\multicolumn{5}{l}{Total time at risk: 18713} \\
+    				\multicolumn{5}{l}{Log-likelihood = -1888.809, df = 2} \\
+    				\multicolumn{5}{l}{AIC = 3781.618} \\
+    		\end{tabular}}%
+    		\label{tab:modelo}%
+    	\end{table}    	
+    	
+    \section{Conclusiones}
+    	
+    \section{Referencias}
+    \renewcommand{\refname}{}
+    \vspace{-1cm}
+	    \begin{thebibliography}{}
+	    	
+	    \end{thebibliography}
+
+
+\end{document}
