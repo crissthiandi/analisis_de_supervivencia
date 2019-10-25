@@ -55,7 +55,8 @@
 	\end{center}
 	
 	\begin{abstract}
-		En el siguiente reporte se busca analizar el comportamiento del tiempo de pago de un préstamo no revolvente correspondiente a una institución financiera y determinar si las variables género y/o nivel académico influyen en dicho tiempo. Para ello se utilizó herramientas del análisis de supervivencia. Se llegó a la conclusión de no existe evidencia de que dichas variables ejercen una influencia significativa en el tiempo.\\
+		En el siguiente reporte se busca analizar el comportamiento del tiempo de pago de un préstamo no revolvente correspondiente a una institución financiera y determinar si las variables género y/o nivel académico influyen en dicho tiempo. Para ello se utilizó herramientas del análisis de supervivencia. Se llegó a la conclusión de no existe evidencia de que dichas variables ejercen una influencia significativa en el tiempo, por lo que no se definieron subpoblaciones en la muestra. Finalmente, se ajustó el modelo paramétrico Loglogístico.\\
+		
 		\vspace{2mm}
 		\underline{\textbf{Palabras clave:}} \hspace{1mm} \textit{datos financieros, análisis de supervivencia, tiempo de pago, riesgo de crédito}
 	\end{abstract}
@@ -143,38 +144,36 @@
 	el  75.4\% de los préstamos son de \$1000. Siendo en promedio 943.2\$ el monto del préstamo. De igual forma, se observa que el la mayor 
 	parte de los préstamos tienen plazos quincenales y mensuales. Por otro lado, podemos notar que la mayoría de los clientes son universitarios y de preparatoria 
 	o menor grado. Por último, se tiene que solamente una quinta parte de la muestra esta conformada por
-	mujeres.	
-	%% Aquí acabó en la pagina 2 exacto, lo demás ya no usaré multicols 
-	%%porque necesito tener el comando \twocolumns para poder ingresar 
-	%%tablas 
-	%%y graficos en sus entornos sin necesidad de romper el multicols xd 
-	%jejejej okis.cris
-	\end{multicols}
-	\twocolumn \onehalfspacing
-	% Aquí continua más chevere xd
+	mujeres.
+	
 	\subsection{Enfoque gráfico}
 	\subsubsection{Por género}
 	
 	A continuación se muestra una descripción de la base de datos de acuerdo a las variables género y nivel académico.
 	
-	%%% GRAFICAS PARA EXPPLICAR ALV
-	\begin{figure}[htb]
-	\centering
-	\includegraphics[width=\linewidth]{EducationByGenderGraph}
-	\caption{Gráfico de barras que muestra el recuento de clientes por nivel académico y además muestra la proporción mujeres-hombres.}
-	\label{fig:educationbygendergraph}
-	\end{figure}
-
 	En la Figura \ref{fig:educationbygendergraph} podemos ver como está distribuida la proporción de hombres y mujeres según nivel educativo, en el vemos que en esta base de datos, se tiene que en todos los niveles educativos hay más hombres que mujeres. En el nivel educativo ``Master or above''  no hay registro de clientas.
 	
-	\begin{figure}[htb]
-	\centering
-	\includegraphics[width=\linewidth]{StatusByGender}
-	\caption{Gráfica de barras que muestra el recuento de clientes de acuerdo al estatus de su préstamo y la proporción de mujeres y hombres.}
-	\label{fig:statusbygender}
-	\end{figure}
-	
 	En la figura \ref{fig:statusbygender} se tiene que aunque pequeño, el número de mujeres que no pagaron su préstamo durante el estudio existe y no es cero. La distribución hombres-mujeres según el estado del préstamo a simple vista parece ser uniforme. Esto quiere decir que, por ejemplo, no parece haber algún estatus en el que hayan significativamente más mujeres que hombres a comparación de las otras variables. Por otro lado, la proporción de hombres que no han pagado es similar a la de hombres que pagaron fuera del plazo.
+	
+	En el gráfico de la figura \ref{fig:termsbygender} se puede apreciar como se dividen las proporciones de hombres y mujeres según el plazo que tuvieron para pagar su deuda. Podemos ver que la mayoría de las personas tuvieron entre 15 y 30 días para pagar, la cantidad de personas que tuvieron un plazo de 7 días es por mucho menor a la de los otros dos plazos posibles. La mayoría tuvo el plazo de 30 días para pagar, de estos la mayoría fue hombres. De igual manera que en en la figura \ref{fig:statusbygender}, parece haber una distribución uniforme de la proporción hombres-mujeres, por lo que de manera intuitiva parece ser que la variable género no influye en el tiempo de pago.
+	
+	\end{multicols}
+	
+	\begin{figure}[!htb]
+		\centering
+		\subfloat[Gráfico de barras que muestra el recuento de clientes por nivel académico y la proporción mujeres-hombres.]{
+			\label{fig:educationbygendergraph}
+			\includegraphics[width=0.5\linewidth]{EducationByGenderGraph}}
+		\subfloat[Gráfica de barras que muestra el recuento de clientes de acuerdo al estatus de su préstamo y la proporción de mujeres y hombres.]{
+			\label{fig:statusbygender}
+			\includegraphics[width=0.5\linewidth]{StatusByGender}}
+		\caption{En las gráficas se puede observar el recuento de los clientes haciendo una separación por su nivel académico y su estatus de su crédito, mostrando cuántos son hombres y mujeres. }
+		\label{fig1fig2}
+	\end{figure}
+
+	\twocolumn \onehalfspacing
+	% Aquí continua más chevere xd
+	%%% GRAFICAS PARA EXPPLICAR ALV
 	
 	\begin{figure}[htb]
 	\centering
@@ -182,8 +181,6 @@
 	\caption{Gráfico de barras que muestra el recuento de clientes de acuerdo al plazo del préstamo así como la proporción de mujeres y hombres.}
 	\label{fig:termsbygender}
 	\end{figure}
-	
-	En el gráfico de la figura \ref{fig:termsbygender} se puede apreciar como se dividen las proporciones de hombres y mujeres según el plazo que tuvieron para pagar su deuda. Podemos ver que la mayoría de las personas tuvieron entre 15 y 30 días para pagar, la cantidad de personas que tuvieron un plazo de 7 días es por mucho menor a la de los otros dos plazos posibles. La mayoría tuvo el plazo de 30 días para pagar, de estos la mayoría fue hombres. De igual manera que en en la figura \ref{fig:statusbygender}, parece haber una distribución uniforme de la proporción hombres-mujeres, por lo que de manera intuitiva parece ser que la variable género no influye en el tiempo de pago.
 	
 	\subsubsection{Por nivel académico}
 	
@@ -343,16 +340,20 @@
     	
     	Para ello veamos la figura \ref{fig:papelesplot}, en la cual se grafican %esta palabra no lleva acento potque es el verbo
     	las curvas de supervivencia teóricas y las curva de supervivencia estimadas vía Kaplan-Meier. Se puede ver que se eligieron estas dos curvas a ajustar ya que tienden a parecerse entre sí.
+    
+    	Por otro lado, notamos que la curva de papel de probabilidad del modelo Loglogístico oscila respecto a una recta, mientras que el papel de probabilidad del modelo Lognormal no, la cual parece más bien tener una tendencia de curva no lineal.
+    	
+    	Con base en lo anterior, el modelo paramétrico que se seleccionó fue el Loglogístico con parámetros $a=1.6953$ (shape) y $b=28.8519$ (scale). De la Tabla \ref{tab:modelo} se puede obtener estimaciones por intervalo de confianza al 95\% de los parámetros así como sus desviaciones estándar.
+    	
+    	Es importante recalcar que la paquetería \verb|flexsurv| utiliza para el modelo Loglogístico la función de supervivencia dada por $$ S(t) = \frac{1}{1+(t/b)^a},\,t\ge 0.$$
     	
     	\begin{figure}[htb]
     		\centering
     		\includegraphics[width=\linewidth]{papelesPlot}
     		\caption{Modelos paramétricos (los dos mejores) con sus respectivos 
-    		papeles de probabilidad.}
+    			papeles de probabilidad.}
     		\label{fig:papelesplot}
     	\end{figure}
-    
-    	Por otro lado, notamos que la curva de papel de probabilidad del modelo Loglogístico oscila respecto a una recta, mientras que el papel de probabilidad del modelo Lognormal no, la cual parece más bien tener una tendencia de curva no lineal.
     	
     	\begin{table}[htbp]
     		\centering
@@ -372,8 +373,6 @@
     		\end{tabular}}%
     		\label{tab:AIC}%
     	\end{table}
-    	
-    	Con base en lo anterior, el modelo paramétrico que se seleccionó fue el Loglogístico\footnote{La paquetería flexsurv utiliza la función de supervivencia del modelo loglogístico dado por $ S(t) = 1/[1+(t/b)^a]$} con parámetros $a=1.6953$ (shape) y $b=28.8519$ (scale). De la Tabla \ref{tab:modelo} se puede obtener estimaciones por intervalo de confianza al 95\% de los parámetros así como sus desviaciones estándar.
     	
     	\begin{table}[htbp]
     		\centering
@@ -399,14 +398,28 @@
     		\end{tabular}}%
     		\label{tab:modelo}%
     	\end{table}    	
-    	
+    	\newpage
     \section{Conclusiones}
+    	Con base al análisis realizado con la muestra de la I.F., se concluye que el género y el nivel académico no muestran tener algún efecto con respecto al tiempo en días que taran sus clientes en pagar su préstamo. Sin embargo, como se ha comentado anteriormente, sería recomendable utilizar otra muestra en la que haya mayor presencia de clientes con algún posgrado, ya que número de individuos con esa característica fueron solamente 4 lo que pudo afectar la estimación de su curva de supervivencia para la variable tiempo de vida definida en este reporte.
+    	
+    	Con los datos esta muestra, se pudo ajustar un modelo paramétrico al tiempo en días que tarda un cliente en pagar su préstamo, el cual fue Loglogístico(1.6953, 26.3836).
+    	
+    	Como sugerencia, sería interesante evaluar el efecto de otras covariables como es el plazo que tienen para pagar sus préstamos o el monto de su préstamo. Así mismo, un análisis con un enfoque diferente pudiese ser respecto a las probabilidades de incumplimiento que puede presentar un cliente mediante la estimación de las curvas de supervivencia del tiempo en días hasta que ocurre el impago. Lo anterior con el fin de sacar un mayor provecho a los datos de la I.F. aunque sería necesario considerar una base de datos más apropiada para esos fines porque puede ser mucho más útil poder estimar dichas probabilidades para los requerimientos de capital que establezca la Ley, en nuestro caso que estamos en México, las Disposiciones de Carácter General Aplicables a las Instituciones de Crédito.
+    	
     	
     \section{Referencias}
     \renewcommand{\refname}{}
     \vspace{-1cm}
 	    \begin{thebibliography}{}
+	    	\bibitem{banxico} \verb|https://www.banxico.org.mx/sistema-financiero|
+	    	\verb|/d/%7B691D5348-6C29-424E-4A6F-C1E6F6F47A00%7D.pdf|
 	    	
+	    	\bibitem{flexsurv} \verb|https://cran.r-project.org/web/packages/flex|
+	    	\verb|surv/flexsurv.pdf|
+	    	
+	    	\bibitem{banxico} Definiciones básicas de Riesgo, Noviembre 2005. BANCO DE MÉXICO.
+	    	
+	    	\bibitem{Javier} Martinez, Javier. (2017). Análisis de Superviviencia en R. Obtenido de: \verb|https://rpubs.com/JavierMtzG/Supervivencia|
 	    \end{thebibliography}
 
 
